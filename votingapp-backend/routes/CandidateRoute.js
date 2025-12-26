@@ -80,20 +80,14 @@ router.delete('/:candidateID', jwtAuthMiddleware, async (req, res)=>{
 
 router.get('/', jwtAuthMiddleware, async (req, res) => {
   try {
-    // Get logged-in user
     const user = await User.findById(req.user.id);
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Fetch candidates
-    const candidates = await Candidate.find(
-      {},
-      'name party _id address age'
-    );
+    const candidates = await Candidate.find({}, 'name party _id address age');
 
-    // Send candidates + vote status
     res.status(200).json({
       candidates,
       hasVoted: user.isVoted
@@ -104,6 +98,7 @@ router.get('/', jwtAuthMiddleware, async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
 
 
 module.exports = router;
