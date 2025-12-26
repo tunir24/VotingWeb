@@ -10,24 +10,45 @@ export default function Voting({ token, onShowResults }) {
   useEffect(() => {
     if (!token) return;
 
-    // Check if user already voted (stored locally)
-    const hasVoted = localStorage.getItem("hasVoted") === "true";
-    setVoted(hasVoted);
+    const fetchData = async () => {
+      try {
+        // Fetch candidates
+        const res = await fetch(`${BASE_URL}/candidate`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
-    fetch(`${BASE_URL}/candidate`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then((res) => res.json())
-      .then((data) => {
+        const data = await res.json();
         setCandidates(data);
-        setLoading(false);
-      })
-      .catch(() => {
-        setLoading(false);
+
+        /**
+         * Optional check — works ONLY if backend supports it.
+         * If not, it silently fails (no break).
+         */
+        try {
+          const statusRes = await fetch(`${BASE_URL}/vote/status`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+
+          if (statusRes.ok) {
+            const statusData = await statusRes.json();
+            setVoted(statusData.hasVoted);
+          }
+        } catch (_) {
+          // ignore if route doesn't exist
+        }
+
+      } catch (err) {
         alert("Error fetching candidates");
-      });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, [token]);
 
   const handleVote = async (candidateId) => {
@@ -37,7 +58,6 @@ export default function Voting({ token, onShowResults }) {
       const res = await fetch(`${BASE_URL}/vote/${candidateId}`, {
         method: "GET",
         headers: {
-          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
       });
@@ -47,7 +67,6 @@ export default function Voting({ token, onShowResults }) {
       if (res.ok) {
         alert("Vote successful!");
         setVoted(true);
-        localStorage.setItem("hasVoted", "true");
       } else {
         alert(result.message || "Voting failed");
       }
@@ -98,7 +117,6 @@ export default function Voting({ token, onShowResults }) {
           </div>
         ))}
 
-        {/* View Results */}
         {voted && (
           <div className="text-center mt-6">
             <button
