@@ -39,19 +39,19 @@ export const signupUser = async (body) => {
 // ---------------------------
 // CANDIDATES & VOTING
 // ---------------------------
-export const getCandidates = async (token) => {
-  const res = await fetch(`${BASE_URL}/candidate`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  export const getCandidates = async (token) => {
+    const res = await fetch(`${BASE_URL}/candidate`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
 
-  if (!res.ok) {
-    console.log("TOKEN:", token);
-    const err = await res.json();
-    throw new Error(err.message || "Failed to fetch candidates");
-  }
+    if (!res.ok) {
+      console.log("TOKEN:", token);
+      const err = await res.json();
+      throw new Error(err.message || "Failed to fetch candidates");
+    }
 
-  return res.json();
-};
+    return res.json();
+  };
 
 export const voteCandidate = async (id, token) => {
   const res = await fetch(`${BASE_URL}/vote/${id}`, {
