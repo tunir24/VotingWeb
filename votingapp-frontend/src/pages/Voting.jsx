@@ -10,45 +10,21 @@ export default function Voting({ token, onShowResults }) {
   useEffect(() => {
     if (!token) return;
 
-    const fetchData = async () => {
-      try {
-        // Fetch candidates
-        const res = await fetch(`${BASE_URL}/candidate`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        const data = await res.json();
-        setCandidates(data);
-
-        /**
-         * Optional check — works ONLY if backend supports it.
-         * If not, it silently fails (no break).
-         */
-        try {
-          const statusRes = await fetch(`${BASE_URL}/vote/status`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
-
-          if (statusRes.ok) {
-            const statusData = await statusRes.json();
-            setVoted(statusData.hasVoted);
-          }
-        } catch (_) {
-          // ignore if route doesn't exist
-        }
-
-      } catch (err) {
-        alert("Error fetching candidates");
-      } finally {
+    fetch(`${BASE_URL}/candidate`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setCandidates(data.candidates);
+        setVoted(data.hasVoted); // ✅ from backend
         setLoading(false);
-      }
-    };
-
-    fetchData();
+      })
+      .catch(() => {
+        setLoading(false);
+        alert("Error fetching candidates");
+      });
   }, [token]);
 
   const handleVote = async (candidateId) => {
