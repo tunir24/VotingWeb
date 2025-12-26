@@ -1,11 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
+import { getCandidates, createCandidate, updateCandidate, deleteCandidate } from "../api/api";
 import { useLocation } from "react-router-dom";
-import {
-  getCandidates,
-  createCandidate,
-  updateCandidate,
-  deleteCandidate,
-} from "../api/api";
 
 export default function AdminDashboard() {
   const location = useLocation();
@@ -13,15 +8,14 @@ export default function AdminDashboard() {
 
   const [candidates, setCandidates] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [editingId, setEditingId] = useState(null);
-  const [error, setError] = useState("");
-
   const [newCandidate, setNewCandidate] = useState({
     name: "",
     party: "",
     age: "",
     address: "",
   });
+  const [error, setError] = useState("");
+  const [editingId, setEditingId] = useState(null);
 
   // ================= FETCH CANDIDATES =================
   const fetchCandidates = useCallback(async () => {
@@ -30,12 +24,14 @@ export default function AdminDashboard() {
     setLoading(true);
     try {
       const data = await getCandidates(token);
-
-      if (data?.candidates && Array.isArray(data.candidates)) {
+      console.log(data);     
+      if (Array.isArray(data)) {
+        setCandidates(data);
+      } else if (Array.isArray(data?.candidates)) {
         setCandidates(data.candidates);
       } else {
+        console.error("Invalid API response:", data);
         setCandidates([]);
-        console.error("Invalid response:", data);
       }
     } catch (err) {
       console.error(err);
@@ -49,7 +45,7 @@ export default function AdminDashboard() {
     fetchCandidates();
   }, [fetchCandidates]);
 
-  // ================= FORM HANDLER =================
+  // ================= INPUT HANDLER =================
   const handleInputChange = (e) => {
     setNewCandidate({
       ...newCandidate,
@@ -83,7 +79,7 @@ export default function AdminDashboard() {
       fetchCandidates();
     } catch (err) {
       console.error(err);
-      setError("Operation failed");
+      setError(err.message || "Operation failed");
     }
   };
 
@@ -100,7 +96,7 @@ export default function AdminDashboard() {
 
   // ================= DELETE =================
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this candidate?")) return;
+    if (!window.confirm("Are you sure?")) return;
 
     try {
       await deleteCandidate(id, token);
@@ -112,9 +108,7 @@ export default function AdminDashboard() {
     }
   };
 
-  if (loading) {
-    return <p className="text-center mt-10">Loading candidates...</p>;
-  }
+  if (loading) return <p className="text-center mt-10">Loading candidates…</p>;
 
   return (
     <div className="min-h-screen bg-emerald-100 flex items-center justify-center px-4">
@@ -131,46 +125,21 @@ export default function AdminDashboard() {
             {editingId ? "Edit Candidate" : "Create Candidate"}
           </h2>
 
-          {error && <p className="text-red-600 mb-2">{error}</p>}
+          {error && <p className="text-red-600 text-sm mb-2">{error}</p>}
 
           <div className="grid md:grid-cols-2 gap-3">
-            <input
-              name="name"
-              placeholder="Name"
-              value={newCandidate.name}
-              onChange={handleInputChange}
-              className="input"
-            />
-            <input
-              name="party"
-              placeholder="Party"
-              value={newCandidate.party}
-              onChange={handleInputChange}
-              className="input"
-            />
-            <input
-              type="number"
-              name="age"
-              placeholder="Age"
-              value={newCandidate.age}
-              onChange={handleInputChange}
-              className="input"
-            />
-            <input
-              name="address"
-              placeholder="Address"
-              value={newCandidate.address}
-              onChange={handleInputChange}
-              className="input"
-            />
+            <input name="name" placeholder="Name" value={newCandidate.name} onChange={handleInputChange} className="input" />
+            <input name="party" placeholder="Party" value={newCandidate.party} onChange={handleInputChange} className="input" />
+            <input name="age" type="number" placeholder="Age" value={newCandidate.age} onChange={handleInputChange} className="input" />
+            <input name="address" placeholder="Address" value={newCandidate.address} onChange={handleInputChange} className="input" />
           </div>
 
-          <button className="mt-4 w-full bg-purple-700 text-white py-2 rounded hover:bg-purple-800">
+          <button className="mt-4 w-full bg-purple-700 text-white py-2 rounded">
             {editingId ? "Update Candidate" : "Create Candidate"}
           </button>
         </form>
 
-        {/* CANDIDATE LIST */}
+        {/* LIST */}
         <h2 className="text-xl font-semibold mb-3">Existing Candidates</h2>
 
         {Array.isArray(candidates) && candidates.length === 0 && (
@@ -179,10 +148,7 @@ export default function AdminDashboard() {
 
         {Array.isArray(candidates) &&
           candidates.map((c) => (
-            <div
-              key={c._id}
-              className="flex justify-between items-start bg-gray-50 p-4 mb-3 rounded"
-            >
+            <div key={c._id} className="flex justify-between p-4 bg-gray-50 mb-3 rounded">
               <div>
                 <h3 className="font-semibold">{c.name}</h3>
                 <p>Party: {c.party}</p>
@@ -191,16 +157,10 @@ export default function AdminDashboard() {
               </div>
 
               <div className="flex gap-2">
-                <button
-                  onClick={() => handleEdit(c)}
-                  className="bg-yellow-500 text-white px-3 py-1 rounded"
-                >
+                <button onClick={() => handleEdit(c)} className="bg-yellow-500 text-white px-3 py-1 rounded">
                   Edit
                 </button>
-                <button
-                  onClick={() => handleDelete(c._id)}
-                  className="bg-red-600 text-white px-3 py-1 rounded"
-                >
+                <button onClick={() => handleDelete(c._id)} className="bg-red-600 text-white px-3 py-1 rounded">
                   Delete
                 </button>
               </div>
