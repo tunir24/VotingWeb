@@ -11,7 +11,6 @@ export default function AdminDashboard() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // ✅ Token persistence
   const token = location.state?.token || localStorage.getItem("token");
 
   const [candidates, setCandidates] = useState([]);
@@ -42,8 +41,8 @@ export default function AdminDashboard() {
       if (data?.candidates && Array.isArray(data.candidates)) {
         setCandidates(data.candidates);
       } else {
-        console.error("Invalid API response:", data);
         setCandidates([]);
+        console.error("Invalid API response:", data);
       }
     } catch (err) {
       console.error("Fetch error:", err);
@@ -104,17 +103,22 @@ export default function AdminDashboard() {
     }
   };
 
-  if (loading) return <p className="text-center mt-10">Loading candidates...</p>;
+  if (loading) {
+    return <p className="text-center mt-10">Loading candidates...</p>;
+  }
 
   return (
     <div className="min-h-screen bg-emerald-100 flex items-center justify-center px-4">
       <div className="bg-white max-w-5xl w-full rounded-xl shadow-lg p-6">
 
-        <h1 className="text-2xl font-bold text-center">Administration Control</h1>
+        <h1 className="text-2xl font-bold text-center">
+          Administration Control
+        </h1>
         <p className="text-center text-gray-500 mb-6">
           Election Commission – Candidate Management
         </p>
 
+        {/* FORM */}
         <form onSubmit={handleSubmit} className="bg-gray-50 p-4 rounded-lg mb-6">
           <h2 className="font-semibold mb-3">
             {editingId ? "Edit Candidate" : "Create Candidate"}
@@ -123,17 +127,43 @@ export default function AdminDashboard() {
           {error && <p className="text-red-600 mb-2">{error}</p>}
 
           <div className="grid md:grid-cols-2 gap-3">
-            <input name="name" value={newCandidate.name} onChange={handleInputChange} placeholder="Name" />
-            <input name="party" value={newCandidate.party} onChange={handleInputChange} placeholder="Party" />
-            <input name="age" type="number" value={newCandidate.age} onChange={handleInputChange} placeholder="Age" />
-            <input name="address" value={newCandidate.address} onChange={handleInputChange} placeholder="Address" />
+            <input
+              className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-400"
+              name="name"
+              placeholder="Name"
+              value={newCandidate.name}
+              onChange={handleInputChange}
+            />
+            <input
+              className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-400"
+              name="party"
+              placeholder="Party"
+              value={newCandidate.party}
+              onChange={handleInputChange}
+            />
+            <input
+              className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-400"
+              type="number"
+              name="age"
+              placeholder="Age"
+              value={newCandidate.age}
+              onChange={handleInputChange}
+            />
+            <input
+              className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-400"
+              name="address"
+              placeholder="Address"
+              value={newCandidate.address}
+              onChange={handleInputChange}
+            />
           </div>
 
-          <button className="mt-4 w-full bg-purple-700 text-white py-2 rounded">
+          <button className="mt-4 w-full bg-purple-700 text-white py-2 rounded-lg hover:bg-purple-800 transition">
             {editingId ? "Update Candidate" : "Create Candidate"}
           </button>
         </form>
 
+        {/* CANDIDATE LIST */}
         <h2 className="text-xl font-semibold mb-3">Existing Candidates</h2>
 
         {Array.isArray(candidates) && candidates.length === 0 && (
@@ -142,7 +172,10 @@ export default function AdminDashboard() {
 
         {Array.isArray(candidates) &&
           candidates.map((c) => (
-            <div key={c._id} className="flex justify-between p-4 bg-gray-50 mb-3 rounded">
+            <div
+              key={c._id}
+              className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-gray-50 p-4 mb-3 rounded-lg"
+            >
               <div>
                 <h3 className="font-semibold">{c.name}</h3>
                 <p>Party: {c.party}</p>
@@ -151,10 +184,16 @@ export default function AdminDashboard() {
               </div>
 
               <div className="flex gap-2">
-                <button onClick={() => handleEdit(c)} className="bg-yellow-500 text-white px-3 py-1 rounded">
+                <button
+                  onClick={() => handleEdit(c)}
+                  className="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition"
+                >
                   Edit
                 </button>
-                <button onClick={() => handleDelete(c._id)} className="bg-red-600 text-white px-3 py-1 rounded">
+                <button
+                  onClick={() => handleDelete(c._id)}
+                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+                >
                   Delete
                 </button>
               </div>
