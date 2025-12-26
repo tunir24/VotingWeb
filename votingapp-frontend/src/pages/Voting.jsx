@@ -95,7 +95,7 @@ export default function Voting({ token, onShowResults }) {
       ))}
 
       {/* View Results */}
-      { (
+      {voted && (
         <div className="text-center mt-6">
           <button
             className="px-6 py-2 rounded-lg bg-sky-600 text-white font-medium hover:bg-sky-700 transition"
