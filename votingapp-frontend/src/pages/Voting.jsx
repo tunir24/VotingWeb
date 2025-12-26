@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+const BASE_URL = process.env.REACT_APP_API_URL;
 
 export default function Voting({ token, onShowResults }) {
   const [candidates, setCandidates] = useState([]);
@@ -8,7 +9,7 @@ export default function Voting({ token, onShowResults }) {
   useEffect(() => {
     if (!token) return;
 
-    fetch("http://localhost:5000/candidate", {
+    fetch(`${BASE_URL}/candidate`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -29,7 +30,7 @@ export default function Voting({ token, onShowResults }) {
 
     try {
       const res = await fetch(
-        `http://localhost:5000/vote/${candidateId}`,
+        `${BASE_URL}/vote/${candidateId}`,
         {
           method: "GET",
           headers: {

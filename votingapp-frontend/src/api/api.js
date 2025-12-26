@@ -1,5 +1,5 @@
 
-const BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
+const BASE_URL = process.env.REACT_APP_API_URL;
 
 // ---------------------------
 // VOTER AUTH
@@ -45,6 +45,7 @@ export const getCandidates = async (token) => {
   });
 
   if (!res.ok) {
+    console.log("TOKEN:", token);
     const err = await res.json();
     throw new Error(err.message || "Failed to fetch candidates");
   }
